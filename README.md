@@ -3,12 +3,6 @@
 This is a fork of the pubref kotlin rules. Detailed documentation is
 incoming. The `old` directory contains pubref logic and documentation.
 
-## Usage (detailed documentation incoming):
-
-The workspace import is: `//kotlin:kotlin.bzl`. see the file for usage details.
-
-Basic smoke tests can be run using `make test.smoke`.
-
 ## Changes made to the pubref rules.
 
 * The macros have been replaced with three basic rules. These model the java rules as much as possible -- `kotlin_binary`, `kotlin_library` and `kotlin_test`.

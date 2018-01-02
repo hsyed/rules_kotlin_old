@@ -32,7 +32,7 @@ kotlin_binary(
     srcs=glob(["helloworld/Main.kt"]),
     main_class= "helloworld.Main",
     data=glob(["data/*"]),
-    opts={
-        "jvm-target": "1.8"
-    },
+#    opts={
+#        "jvm-target": "1.8"
+#    },
 )
