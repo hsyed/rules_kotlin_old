@@ -1,0 +1,2 @@
+build --strategy=KotlinCompile=worker
+test --strategy=KotlinCompile=worker

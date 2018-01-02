@@ -1,16 +1,22 @@
-load("//kotlin:java_import_external.bzl", "java_import_external")
-load("//kotlin:rules.bzl", "kotlin_repositories")
+workspace(name="io_bazel_rules_kotlin")
 
+load("//kotlin:kotlin.bzl", "kotlin_repositories")
 kotlin_repositories()
 
-maven_jar(
-    name = "junit4",
-    artifact = "junit:junit:jar:4.12",
-)
+
+maven_jar(name = "junit_junit",artifact = "junit:junit:jar:4.12")
+
+
+
+#load("//:bazel_versions.bzl", "BAZEL_VERSIONS")
+#git_repository(
+#  name="io_bazel_integration_testing",
+#  remote="https://github.com/bazelbuild/bazel-integration-testing",
+#  commit="55a6a70"
+#)
 
 # Used to demonstrate/test maven dependencies
-maven_jar(
-    name = "com_google_guava_guava_21_0",
-    artifact = "com.google.guava:guava:jar:21.0",
-    sha1 = "3a3d111be1be1b745edfa7d91678a12d7ed38709",
-)
+#
+#load("@io_bazel_integration_testing//tools:repositories.bzl", "bazel_binaries")
+#bazel_binaries()
+#load("@io_bazel_integration_testing//tools:bazel_java_integration_test.bzl", "bazel_java_integration_test")
