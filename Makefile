@@ -12,4 +12,4 @@ docs.regen:
 docs.preview_local:
 	bazel build //kotlin:docs --define local=1
 	unzip -o bazel-bin/kotlin/docs-skydoc.zip -d /tmp/rules_kotlin
-	open /tmp/rules_kotlin/index.html
+	open /tmp/rules_kotlin/kotlin/kotlin.html

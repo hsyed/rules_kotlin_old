@@ -20,7 +20,6 @@ def _kotlin_do_compile_action(ctx, output_jar, compile_jars, opts):
       ctx: the ctx of the rule in scope when this macro is called. The macro will pick up the following entities from
         the rule ctx:
           * The `srcs` to compile.
-          * The `_kotlin_home` fileset -- contains all the relavant jars available in the Kotlin Compiler distribution.
       output_jar: The jar file that this macro will use as the output of the action -- a hardcoded default output is not
         setup by this rule as this would close the door to optimizations for simple compile operations.
       compile_jars: The compile time jars provided on the classpath for the compile operations -- callers are
@@ -30,7 +29,9 @@ def _kotlin_do_compile_action(ctx, output_jar, compile_jars, opts):
     """
     args = [
         "-d", output_jar.path,
-        "-cp", ":".join([f.path for f in compile_jars])
+        "-cp", ":".join([f.path for f in compile_jars.to_list()]),
+        # TODO remove this hardcoding. Once I get past intelij plugin debugging issues.
+        "-jvm-target", "1.8", "-api-version", "1.2", "-language-version", "1.2"
     ]
 
 
@@ -77,8 +78,6 @@ def _select_compilation_options(ctx):
   )
 
 def _select_std_libs(ctx):
-    # TODO find a way of selecting implicit std dependencies via a global profile or rule specific profiles. Profiles
-    # should contain other tuneables as well.
     return ctx.files._kotlin_std
 
 def _make_java_provider(ctx, auto_deps=[]):
@@ -133,13 +132,17 @@ def _make_java_provider(ctx, auto_deps=[]):
 def kotlin_make_providers(ctx, java_info, transitive_files=depset(order="default")):
     kotlin_info=_KotlinInfo(
         src=ctx.attr.srcs,
-        outputs = struct(jars = [struct(class_jar = ctx.outputs.jar, ijar = None)]), # intelij aspect needs this.
+        outputs = struct(
+            jars = [struct(
+              class_jar = ctx.outputs.jar,
+              ijar = None
+            )]
+        ), # intelij aspect needs this.
     )
 
     default_info = DefaultInfo(
         files=depset([ctx.outputs.jar]),
         runfiles=ctx.runfiles(
-#            files=[ctx.file._kotlin_compiler],
             transitive_files=transitive_files,
             collect_default=True
         ),

@@ -7,10 +7,12 @@ def _select_compile_jars(dep):
         return []
     is_kotlin_provider = KotlinInfo in dep
     java_provider = dep[JavaInfo]
-    if not is_kotlin_provider:
-        return java_provider.compile_jars
+    if is_kotlin_provider:
+       return java_provider.full_compile_jars
+    elif dep.label.workspace_root == "external/com_github_jetbrains_kotlin":
+         return java_provider.full_compile_jars
     else:
-        return java_provider.full_compile_jars
+        return java_provider.compile_jars
 
 def collect_jars_for_compile(deps):
     """creates the compile jar depset, this should be strict including only the output jars of the listed dependencies.
@@ -161,7 +163,7 @@ def kotlin_write_launcher_action(ctx, rjars, main_class, jvm_flags, args="", wra
     runfiles_root = "${TEST_SRCDIR}/%s" % ctx.workspace_name
     # RUNPATH is defined here:
     # https://github.com/bazelbuild/bazel/blob/0.4.5/src/main/java/com/google/devtools/build/lib/bazel/rules/java/java_stub_template.txt#L227
-    classpath = ":".join(["${RUNPATH}%s" % (j.short_path) for j in rjars])
+    classpath = ":".join(["${RUNPATH}%s" % (j.short_path) for j in rjars.to_list()])
     jvm_flags = " ".join([ctx.expand_location(f, ctx.attr.data) for f in jvm_flags])
     javabin = "%s/%s" % (runfiles_root, ctx.executable._java.short_path)
     template = ctx.attr._java_stub_template.files.to_list()[0]

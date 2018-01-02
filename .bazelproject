@@ -5,3 +5,9 @@ directories:
 
 targets:
   //kotlin/workers/...
+  //tests/smoke/...
+
+kotlin_language_version: 1.2
+
+additional_languages:
+  kotlin

@@ -2,7 +2,9 @@
 
 ### Setup
 
-```python
+Add the following snippet to your `WORKSPACE` file:
+
+```bzl
 git_repository(
     name = "io_bazel_rules_kotlin",
     remote = "https://github.com/bazelbuild/rules_kotlin.git",
@@ -11,6 +13,32 @@ git_repository(
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories")
 kotlin_repositories(kotlin_release_version = "1.2.10")
 ```
+
+To enable persistent worker support, add the following to the appropriate `bazelrc` file:
+
+```
+build --strategy=KotlinCompile=worker
+test --strategy=KotlinCompile=worker
+```
+
+
+### Standard Libraries
+
+The Kotlin libraries that are bundled in a kotlin release should be used with the rules. After enabling the repository
+the following Kotlin Libraries are made available in the kotlin compiler repository -- `com_github_jetbrains_kotlin`:
+
+* `stdlib`
+* `stdlib-jdk7`,
+* `stdlib-jdk8`,
+* `test`,
+* `reflect`.
+
+So if you needed to add reflect as a dep use the following label `@com_github_jetbrains_kotlin//:reflect`.
+
+### Caveats
+
+* The compiler is currently not configurable.
+* `stdlib`, `stdlib-jdk7` and `stdlib-jdk8` are added by default to any compile operation.
 """
 
 load("//kotlin/rules:defs.bzl", "KOTLIN_REPO_ROOT")

@@ -32,12 +32,12 @@ def kotlin_binary_impl(ctx):
 def kotlin_junit_test_impl(ctx):
     java_info = _kotlin_compile_action(ctx)
 
-    runtime_jars = java_info.transitive_runtime_jars + ctx.files._bazel_test_runner
+    transitive_runtime_jars = java_info.transitive_runtime_jars + ctx.files._bazel_test_runner
     launcherJvmFlags = ["-ea", "-Dbazel.test_suite=%s"% ctx.attr.test_class]
 
     _kotlin_write_launcher_action(
         ctx,
-        runtime_jars,
+        transitive_runtime_jars,
         main_class = "com.google.testing.junit.runner.BazelTestRunner",
         jvm_flags = launcherJvmFlags + ctx.attr.jvm_flags,
     )
@@ -46,7 +46,7 @@ def kotlin_junit_test_impl(ctx):
         java_info,
         depset(
             order = "default",
-            transitive=[runtime_jars],
+            transitive=[transitive_runtime_jars],
             direct=[ctx.outputs.wrapper, ctx.executable._java]
         )
     )

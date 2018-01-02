@@ -74,7 +74,7 @@ final class KotlinJVMCompiler implements CommandLineProgram {
 
     /**
      * The compiler is loaded via an in memory class loader, uses some of the infrastructure from the Jetbrains
-     * Preloader. It's a singleton so it should be reused in the same JVM.
+     * Preloader.
      */
     static KotlinJVMCompiler build() {
         try {
