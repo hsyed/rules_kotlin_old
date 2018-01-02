@@ -1,6 +1,6 @@
 # Overview
 
-[Skydoc documentation](https://hsyed.github.com/rules_kotlin)
+[Skydoc documentation](https://hsyed.github.io/rules_kotlin/kotlin/kotlin.html)
 
 This is a fork of the pubref kotlin rules. Detailed documentation is incoming. The `old` directory contains pubref logic and documentation.
 
