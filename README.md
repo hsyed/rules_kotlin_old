@@ -1,7 +1,8 @@
 # Overview
 
-This is a fork of the pubref kotlin rules. Detailed documentation is
-incoming. The `old` directory contains pubref logic and documentation.
+[Skydoc documentation](https://hsyed.github.com/rules_kotlin)
+
+This is a fork of the pubref kotlin rules. Detailed documentation is incoming. The `old` directory contains pubref logic and documentation.
 
 ## Changes made to the pubref rules.
 
