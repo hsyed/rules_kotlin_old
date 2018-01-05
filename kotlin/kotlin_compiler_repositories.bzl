@@ -60,6 +60,11 @@ java_import(
 )
 
 java_import(
+    name = "script-runtime",
+    jars = ["lib/kotlin-script-runtime.jar"],
+)
+
+java_import(
     name = "preloader",
     jars = ["lib/kotlin-preloader.jar"],
 )

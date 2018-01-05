@@ -30,12 +30,11 @@ def _kotlin_do_compile_action(ctx, output_jar, compile_jars, opts):
     args = [
         "-d", output_jar.path,
         "-cp", ":".join([f.path for f in compile_jars.to_list()]),
-        # TODO remove this hardcoding. Once I get past intelij plugin debugging issues.
+        # https://github.com/hsyed/rules_kotlin/issues/3.
         "-jvm-target", "1.8", "-api-version", "1.2", "-language-version", "1.2"
     ]
 
-
-    # TODO re-enable all of the options
+    # re-enable compilation options https://github.com/hsyed/rules_kotlin/issues/3.
 #    for k, v in ctx.attr.opts.items():
 #        args + [ "-%s" % k, v]:
 
@@ -54,7 +53,9 @@ def _kotlin_do_compile_action(ctx, output_jar, compile_jars, opts):
     args_file = ctx.actions.declare_file(ctx.label.name + "-worker.args")
     ctx.actions.write(args_file, "\n".join(args))
 
-    compile_inputs = depset([args_file]) + ctx.files.srcs + compile_jars
+    # When a stratetegy isn't provided for the worker and the workspace is fresh then certain deps are not available under
+    # external/@com_github_jetbrains_kotlin/... that is why the classpath is added explicetly.
+    compile_inputs = depset([args_file]) + ctx.files.srcs + compile_jars + ctx.files._kotlin_compiler_classpath
 
     ctx.action(
         mnemonic = "KotlinCompile",

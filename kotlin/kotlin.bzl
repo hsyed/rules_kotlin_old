@@ -37,15 +37,17 @@ So if you needed to add reflect as a dep use the following label `@com_github_je
 
 ### Caveats
 
-* The compiler is currently not configurable.
-* `stdlib`, `stdlib-jdk7` and `stdlib-jdk8` are added by default to any compile operation.
+* The compiler is currently not configurable [issue](https://github.com/hsyed/rules_kotlin/issues/3).
+* The compiler is harded to target jdk8 and language and api levels "1.2" [issue](https://github.com/hsyed/rules_kotlin/issues/3).
+* `stdlib`, `stdlib-jdk7` and `stdlib-jdk8` are added by default to any compile operation [issue](https://github.com/hsyed/rules_kotlin/issues/3).
 """
-
-load("//kotlin/rules:defs.bzl", "KOTLIN_REPO_ROOT")
+# This file is the main import -- it shouldn't grow out of hand the reason it contains so much allready is due to the limitations of skydoc.
 
 ########################################################################################################################
 # Common Definitions
 ########################################################################################################################
+
+load("//kotlin/rules:defs.bzl", "KOTLIN_REPO_ROOT")
 
 # The files types that may be passed to the core Kotlin compile rule.
 _kt_compile_filetypes = FileType([".kt"])
@@ -61,6 +63,14 @@ _srcjar_filetype = FileType([
 # Rule Attributes
 ########################################################################################################################
 _implicit_deps = {
+    "_kotlin_compiler_classpath": attr.label_list(
+        allow_files = True,
+        default = [
+            Label("@" + KOTLIN_REPO_ROOT + "//:compiler"),
+            Label("@" + KOTLIN_REPO_ROOT + "//:reflect"),
+            Label("@" + KOTLIN_REPO_ROOT + "//:script-runtime"),
+        ],
+    ),
     "_kotlinw": attr.label(
         default = Label("//kotlin/workers/compilers/jvm"),
         executable = True,
@@ -69,8 +79,7 @@ _implicit_deps = {
     # The kotlin runtime
     "_kotlin_runtime": attr.label(
         single_file = True,
-        default =
-            Label("@" + KOTLIN_REPO_ROOT + "//:runtime"),
+        default = Label("@" + KOTLIN_REPO_ROOT + "//:runtime"),
     ),
     # The kotlin stdlib
     "_kotlin_std": attr.label_list(default = [
