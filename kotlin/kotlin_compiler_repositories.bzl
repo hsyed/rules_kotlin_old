@@ -89,7 +89,7 @@ exports_files(["src"])
 
 KOTLIN_CURRENT_RELEASE = "1.2.10"
 
-_BAZEL_JAVA_LAUNCHER_VERSION = "0.4.5"
+_BAZEL_JAVA_LAUNCHER_VERSION = "0.8.1"
 
 def kotlin_compiler_repository(
     kotlin_release_version=KOTLIN_CURRENT_RELEASE
@@ -119,5 +119,5 @@ def kotlin_compiler_repository(
                _BAZEL_JAVA_LAUNCHER_VERSION +
            "/src/main/java/com/google/devtools/build/lib/bazel/rules/java/" +
            "java_stub_template.txt"),
-        sha256 = "f09d06d55cd25168427a323eb29d32beca0ded43bec80d76fc6acd8199a24489",
+        sha256 = "86660ee7d5b498ccf611a1e000564f45268dbf301e0b2b08c984dcecc6513f6e",
     )
