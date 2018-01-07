@@ -35,8 +35,6 @@ def collect_all_jars(deps):
             java_provider = dep_target[JavaInfo]
             compile_jars += java_provider.compile_jars
             transitive_compile_time_jars += java_provider.transitive_compile_time_jars
-            if hasattr(java_provider, "runtime_jars"):
-                runtime_jars += java_provider.runtime_jars
             transitive_runtime_jars += java_provider.transitive_runtime_jars
 
     return struct (
@@ -160,31 +158,9 @@ def kotlin_write_launcher_action(ctx, rjars, main_class, jvm_flags, args="", wra
         jvm_flags: The flags that should be passed to the jvm.
         args: Args that should be passed to the Binary.
     """
-    runfiles_root = "${TEST_SRCDIR}/%s" % ctx.workspace_name
-    # RUNPATH is defined here:
-    # https://github.com/bazelbuild/bazel/blob/0.4.5/src/main/java/com/google/devtools/build/lib/bazel/rules/java/java_stub_template.txt#L227
     classpath = ":".join(["${RUNPATH}%s" % (j.short_path) for j in rjars.to_list()])
     jvm_flags = " ".join([ctx.expand_location(f, ctx.attr.data) for f in jvm_flags])
-    javabin = "%s/%s" % (runfiles_root, ctx.executable._java.short_path)
     template = ctx.attr._java_stub_template.files.to_list()[0]
-
-    exec_str = ""
-    if wrapper_preamble == "":
-      exec_str = "exec "
-
-    wrapper = ctx.new_file(ctx.label.name + "_wrapper.sh")
-    ctx.file_action(
-        output = wrapper,
-        content = """#!/bin/bash
-{preamble}
-{exec_str}{javabin} "$@" {args}
-""".format(
-            preamble=wrapper_preamble,
-            exec_str=exec_str,
-            javabin=javabin,
-            args=args,
-        ),
-    )
 
     ctx.template_action(
         template = template,
@@ -192,10 +168,8 @@ def kotlin_write_launcher_action(ctx, rjars, main_class, jvm_flags, args="", wra
         substitutions = {
             "%classpath%": classpath,
             "%java_start_class%": main_class,
-            "%javabin%": "JAVABIN=%s/%s" % (runfiles_root, wrapper.short_path),
+            "%javabin%": "JAVABIN=${RUNPATH}" + ctx.executable._java.short_path,
             "%jvm_flags%": jvm_flags,
-            "%needs_runfiles%": "",
-            "%runfiles_manifest_only%": "",
             "%set_jacoco_metadata%": "",
             "%workspace_prefix%": ctx.workspace_name + "/",
         },

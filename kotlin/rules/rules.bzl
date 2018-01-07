@@ -25,7 +25,7 @@ def kotlin_binary_impl(ctx):
         depset(
             order = "default",
             transitive=[java_info.transitive_runtime_jars],
-            direct=[ctx.outputs.wrapper, ctx.executable._java]
+            direct=[ctx.executable._java]
         )
     )
 
@@ -47,6 +47,6 @@ def kotlin_junit_test_impl(ctx):
         depset(
             order = "default",
             transitive=[transitive_runtime_jars],
-            direct=[ctx.outputs.wrapper, ctx.executable._java]
+            direct=[ctx.executable._java]
         )
     )

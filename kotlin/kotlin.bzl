@@ -111,7 +111,6 @@ _implicit_deps = {
         allow_files = True,
     ),
     "_java_stub_template": attr.label(default = Label("@kt_java_stub_template//file")),
-    #    "_jar": attr.label(executable=True, cfg="host", default=Label("@bazel_tools//tools/jdk:jar"), allow_files=True),
 }
 
 _common_attr = dict(_implicit_deps.items() + {
@@ -157,7 +156,7 @@ _common_outputs = dict(
 )
 
 _binary_outputs = dict(_common_outputs.items() + {
-    "wrapper": "%{name}_wrapper.sh",
+#    "wrapper": "%{name}_wrapper.sh",
 }.items())
 
 ########################################################################################################################
