@@ -52,16 +52,20 @@ final class KotlinJVMCompiler implements CommandLineProgram {
     @Override
     public Integer apply(Stream<String> args) {
         Integer exitCode;
+        KotlinCompilerOutputProcessor outputProcessor = KotlinCompilerOutputProcessor.delegatingTo(System.out);
         try {
             final Object exitCodeInstance = execMethod.invoke(
                     compiler,
-                    System.out,
+                    outputProcessor.getCollector(),
                     args.toArray(String[]::new)
             );
             exitCode = (Integer) getCodeMethod.invoke(exitCodeInstance, NO_ARGS);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            outputProcessor.process();
         }
+
         if (exitCode < 2) {
             // 1 is a standard compilation error
             // 2 is an internal error
