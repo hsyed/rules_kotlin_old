@@ -162,19 +162,19 @@ def kotlin_compile_action(ctx):
     Returns:
         A JavaInfo struct for the output jar that this macro will build.
     """
-    # The main output jar.
+    # The main output jars
     output_jar = ctx.outputs.jar
 
-    # The output of the compile step may be combined (folded) with other entities -- e.g., other class files from
-    # annotation processing, embedded resources. If folding needs to occur we need to setup up some indirection.
+    # The output of the compile step may be combined (folded) with other entities -- e.g., other class files from annotation processing, embedded resources.
     kt_compile_output_jar=output_jar
-    # the list of jars to merge into the final output
+    # the list of jars to merge into the final output, start with the resource jars if any were provided.
     output_merge_list=ctx.files.resource_jars
 
-    # If we have any resources setup a zipper action and then add the zipped resource_jar to the merge list
+    # If this rule has any resources declared setup a zipper action to turn them into a jar and then add the declared zipper output to the merge list.
     if len(ctx.files.resources) > 0:
         output_merge_list = output_merge_list + [_kotlin_build_resourcejar_action(ctx)]
 
+    # If this compile operation requires merging other jars setup the compile operation to go to a intermediate file and add that file to the merge list.
     if len(output_merge_list) > 0:
         # Intermediate jar containing the Kotlin compile output.
         kt_compile_output_jar=ctx.new_file(ctx.label.name + "-ktclass.jar")
@@ -183,14 +183,16 @@ def kotlin_compile_action(ctx):
 
     kotlin_auto_deps=_select_std_libs(ctx)
 
+    # setup the compile action.
     _kotlin_do_compile_action(
         ctx,
         kt_compile_output_jar,
         _collect_jars_for_compile(ctx.attr.deps) + kotlin_auto_deps,
         _select_compilation_options(ctx)
     )
-
+    # setup the merge action if needed.
     if len(output_merge_list) > 0:
         _kotlin_fold_jars_action(ctx, output_jar, output_merge_list)
 
+    # create the java provider but the kotlin and default provider cannot be created here.
     return _make_java_provider(ctx, kotlin_auto_deps)

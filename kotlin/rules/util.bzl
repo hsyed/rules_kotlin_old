@@ -44,6 +44,11 @@ def collect_all_jars(deps):
     )
 
 # RESOURCE JARS ########################################################################################################
+_CONVENTIONAL_RESOURCE_PATHS = [
+    "src/main/resources",
+    "src/test/resources",
+]
+
 def _adjust_resources_path_by_strip_prefix(path, resource_strip_prefix):
     if not path.startswith(resource_strip_prefix):
       fail("Resource file %s is not under the specified prefix to strip" % path)
@@ -51,21 +56,12 @@ def _adjust_resources_path_by_strip_prefix(path, resource_strip_prefix):
     clean_path = path[len(resource_strip_prefix):]
     return resource_strip_prefix, clean_path
 
-# TODO add conventional paths
 def _adjust_resources_path_by_default_prefixes(path):
-      #  Here we are looking to find out the offset of this resource inside
-      #  any testresources folder. We want to return the root to the testresources folder
-      #  and then the sub path inside it
-      dir_1, dir_2, rel_path = path.partition("testresources")
-      if rel_path:
-          return  dir_1 + dir_2, rel_path
-
-      #  The same as the above but just looking for java
-      (dir_1, dir_2, rel_path) = path.partition("java")
-      if rel_path:
-          return  dir_1 + dir_2, rel_path
-
-      return "", path
+    for cp in _CONVENTIONAL_RESOURCE_PATHS:
+        dir_1, dir_2, rel_path = path.partition(cp)
+        if rel_path:
+            return  dir_1 + dir_2, rel_path
+    return "", path
 
 def _adjust_resources_path(path, resource_strip_prefix):
     if resource_strip_prefix:
@@ -142,11 +138,7 @@ def kotlin_fold_jars_action(ctx, output_jar, input_jars):
         outputs = [output_jar],
         executable = ctx.executable._singlejar,
         arguments = args,
-        progress_message="Merging %d resources and [%d] jars to %s" % (
-            len(ctx.files.srcs),
-            len(input_jars) -1,
-            output_jar.short_path,
-        )
+        progress_message="Merging Kotlin output jar " + output_jar.short_path
     )
 
 # JVM LAUNCH SCRIPTS ###################################################################################################

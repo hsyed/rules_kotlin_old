@@ -17,7 +17,6 @@ compile releases from JB -- pick them up from here (later: make the toolchain co
 ### Next steps:
 
 * `kotlin_import` rule.
-* Dependency propagation tests -- use integration test framework from bazelbuild. We need a good set of tests to validate the rules for correctness.
 * Compilation profiles: elements of the kotlin compiler should be configurable -- e.g., bytecode target (jdk1.6, jdk1.8), which stdlibs to use (jdk7, jdk8, reflect) etc. The compiler options attributes are currently disabled in the rules.
 * kapt and annotation processing. This should be as easy to setup as the java rules.
 * Ijars: They do not work with any kotlin code which provides inline definitions -- currently full jars are used.

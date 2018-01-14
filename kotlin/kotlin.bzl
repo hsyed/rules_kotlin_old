@@ -25,7 +25,7 @@ test --strategy=KotlinCompile=worker
 ### Standard Libraries
 
 The Kotlin libraries that are bundled in a kotlin release should be used with the rules. After enabling the repository
-the following Kotlin Libraries are made available in the kotlin compiler repository -- `com_github_jetbrains_kotlin`:
+the following Kotlin Libraries are made available from the workspace `com_github_jetbrains_kotlin`:
 
 * `stdlib`
 * `stdlib-jdk7`,
@@ -38,7 +38,7 @@ So if you needed to add reflect as a dep use the following label `@com_github_je
 ### Caveats
 
 * The compiler is currently not configurable [issue](https://github.com/hsyed/rules_kotlin/issues/3).
-* The compiler is harded to target jdk8 and language and api levels "1.2" [issue](https://github.com/hsyed/rules_kotlin/issues/3).
+* The compiler is hardwired to target jdk8 and language and api levels "1.2" [issue](https://github.com/hsyed/rules_kotlin/issues/3).
 * `stdlib`, `stdlib-jdk7` and `stdlib-jdk8` are added by default to any compile operation [issue](https://github.com/hsyed/rules_kotlin/issues/3).
 """
 # This file is the main import -- it shouldn't grow out of hand the reason it contains so much allready is due to the limitations of skydoc.
@@ -156,7 +156,7 @@ _common_outputs = dict(
 )
 
 _binary_outputs = dict(_common_outputs.items() + {
-#    "wrapper": "%{name}_wrapper.sh",
+    #    "wrapper": "%{name}_wrapper.sh",
 }.items())
 
 ########################################################################################################################
@@ -171,7 +171,7 @@ load(
 def kotlin_repositories(
     kotlin_release_version=KOTLIN_CURRENT_RELEASE
 ):
-    """Call this in a WORKSPACE to setup the Kotlin rules.
+    """Call this in the WORKSPACE file to setup the Kotlin rules.
 
     Args:
       kotlin_release_version: The kotlin compiler release version. If this is not set the latest release version is
@@ -200,14 +200,14 @@ Args:
   srcs: The list of source files that are processed to create the target.
   exports: Exported libraries.
 
-    Listing rules here will make them available to parent rules, as if the parents explicitly depended on these rules.
+    Deps listed here will be made available to other rules, as if the parents explicitly depended on these deps.
     This is not true for regular (non-exported) deps.
   resources: A list of data files to include in a Java jar.
-  resource_strip_prefix: The path prefix to strip from Java resources.
-  resource_jars: Set of archives containing Java resources.If specified, the contents of these jars are merged into the
-    output jar.
-  runtime_deps: Libraries to make available to the final binary or test at runtime only. Like ordinary deps, these will
-    appear on the runtime classpath, but unlike them, not on the compile-time classpath.
+  resource_strip_prefix: The path prefix to strip from Java resources, files residing under common prefix such as `src/main/resources` or `src/test/resources`
+    will have stripping applied by convention.
+  resource_jars: Set of archives containing Java resources. If specified, the contents of these jars are merged into the output jar.
+  runtime_deps: Libraries to make available to the final binary or test at runtime only. Like ordinary deps, these will appear on the runtime classpath, but
+    unlike them, not on the compile-time classpath.
   data: The list of files needed by this rule at runtime. See general comments about `data` at [Attributes common to all build rules](https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes).
   deps: A list of dependencies of this rule.See general comments about `deps` at [Attributes common to all build rules](https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes).
 """

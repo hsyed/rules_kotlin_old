@@ -7,23 +7,35 @@ import sys
 
 DEVNULL = open(os.devnull, 'wb')
 
-REPO_ROOT = "org_pubref_rules_kotlin"
-TEST_BASE = "tests/smoke"
+
+def _do_exec(command, silent=True):
+    out = sys.stdout
+    if silent:
+        out = DEVNULL
+    if subprocess.call(command, stdout=out, stderr=out) != 0:
+        raise Exception("command " + " ".join(command) + " failed")
 
 
-def _target(target_name):
-    return "//%s:%s" % (TEST_BASE, target_name)
-
-
-def _bazel_bin(file):
-    return "bazel-bin/" + TEST_BASE + "/" + file
-
-
-def _open_bazel_bin(file):
-    return open(_bazel_bin(file))
+def _do_exec_expect_fail(command, silent=True):
+    out = sys.stdout
+    if silent:
+        out = DEVNULL
+    if subprocess.call(command, stdout=out, stderr=out) == 0:
+        raise Exception("command " + " ".join(command) + " should have failed")
 
 
 class BazelKotlinTestCase(unittest.TestCase):
+    _pkg = None
+
+    def _target(self, target_name):
+        return "//%s:%s" % (self._pkg, target_name)
+
+    def _bazel_bin(self, file):
+        return "bazel-bin/" + self._pkg + "/" + file
+
+    def _open_bazel_bin(self, file):
+        return open(self._bazel_bin(file))
+
     def _query(self, query, implicits=False):
         res = []
         q = ['bazel', 'query', query]
@@ -53,21 +65,18 @@ class BazelKotlinTestCase(unittest.TestCase):
             raise Exception("jar does not contain file [%s]" % curr)
 
     def buildJar(self, target, silent=True):
-        target = _target(target)
-        build = ["bazel", "build", target]
-        print(" ".join(build))
-        out = sys.stdout
-        if silent:
-            out = DEVNULL
-        subprocess.call(build, stdout=out, stderr=out)
+        _do_exec(["bazel", "build", self._target(target)], silent)
+
+    def buildJarExpectingFail(self, target, silent=True):
+        _do_exec_expect_fail(["bazel", "build", self._target(target)], silent)
 
     def buildJarGetZipFile(self, name, extension):
         jar_file = name + "." + extension
         self.buildJar(jar_file)
-        return zipfile.ZipFile(_open_bazel_bin(jar_file))
+        return zipfile.ZipFile(self._open_bazel_bin(jar_file))
 
     def buildLaunchExpectingSuccess(self, target, command="run"):
         self.buildJar(target, silent=False)
-        res = subprocess.call(["bazel", command, _target(target)], stdout=sys.stdout, stderr=sys.stdout)
+        res = subprocess.call(["bazel", command, self._target(target)], stdout=sys.stdout, stderr=sys.stdout)
         if not res == 0:
             raise Exception("could not launch jar [%s]" % target)

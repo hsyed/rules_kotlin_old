@@ -1,7 +1,5 @@
 load("//kotlin:kotlin.bzl", "kotlin_library", "kotlin_binary", "kotlin_test")
 
-#genquery(name = "lib_test", expression = 'filter("^//", kind(".*_library", deps(//:lib)))',scope = ["//:lib"])
-
 # a test resource library.
 java_library(
     name = "resourcejar",
@@ -18,13 +16,69 @@ kotlin_test(
     deps = ["@junit_junit//jar"]
 )
 
-"a library that exports a dependency"
 kotlin_library(
-    name = "testresources",
-    srcs = glob(["testresources/*.kt"]),
-    resources = glob(["testresources/resources/**"]),
+    name = "test_merge_resourcesjar",
+    srcs = glob(["testresources/src/*.kt"]),
     resource_jars = [":resourcejar"],
-    resource_strip_prefix = "tests/smoke/testresources/resources",
+)
+
+kotlin_library(
+    name = "test_embed_resources",
+    srcs = glob(["testresources/src/*.kt"]),
+    resources = glob(["testresources/resources/**/*"])
+)
+
+kotlin_library(
+    name = "test_embed_resources_strip_prefix",
+    srcs = glob(["testresources/src/*.kt"]),
+    resources = glob(["testresources/resources/**/*"]),
+    resource_strip_prefix = "tests/smoke/testresources/resources"
+)
+
+kotlin_library(
+    name = "conventional_strip_resources",
+    srcs = glob(["testresources/src/*.kt"]),
+    resources = glob(["conventional_strip_resources/src/main/resources/**/*", "conventional_strip_resources/src/test/resources/**/*"])
+)
+
+kotlin_library(
+    name = "propagation_test_exporter_lib",
+    srcs = ["propagation/Stub.kt"],
+    exports = ["@junit_junit//jar"]
+)
+
+kotlin_library(
+    name = "propagation_test_runtime_lib",
+    srcs = ["propagation/Stub.kt"],
+    runtime_deps = ["@junit_junit//jar"]
+)
+
+java_binary(
+    name = "propagation_ct_consumer",
+    main_class = "testing.CompileTimeDependent",
+    srcs = ["propagation/CompileTimeDependent.java"],
+    deps = [":propagation_test_exporter_lib"]
+)
+
+java_binary(
+    name = "propagation_ct_consumer_fail_on_runtime",
+    main_class = "testing.CompileTimeDependent",
+    srcs = ["propagation/CompileTimeDependent.java"],
+    deps = [":propagation_test_runtime_lib"]
+)
+
+java_binary(
+    name = "propagation_rt_via_export_consumer",
+    main_class = "testing.RuntimeDependent",
+    srcs = ["propagation/RuntimeDependent.java"],
+    deps = [":propagation_test_exporter_lib"]
+)
+
+java_binary(
+    name = "propagation_rt_via_runtime_deps_consumer",
+    main_class = "testing.RuntimeDependent",
+    srcs = ["propagation/RuntimeDependent.java"],
+    deps = [":propagation_test_runtime_lib"]
 )
 
 kotlin_binary(
@@ -32,7 +86,4 @@ kotlin_binary(
     srcs=glob(["helloworld/Main.kt"]),
     main_class= "helloworld.Main",
     data=glob(["data/*"]),
-#    opts={
-#        "jvm-target": "1.8"
-#    },
 )

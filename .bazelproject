@@ -9,8 +9,5 @@ targets:
 
 kotlin_language_version: 1.2
 
-kotlin_additional_stdlibs:
-  test
-
 additional_languages:
   kotlin

@@ -93,7 +93,7 @@ test --strategy=KotlinCompile=worker
 </code></pre>
 <h3>Standard Libraries</h3>
 <p>The Kotlin libraries that are bundled in a kotlin release should be used with the rules. After enabling the repository
-the following Kotlin Libraries are made available in the kotlin compiler repository -- <code>com_github_jetbrains_kotlin</code>:</p>
+the following Kotlin Libraries are made available from the workspace <code>com_github_jetbrains_kotlin</code>:</p>
 <ul>
 <li><code>stdlib</code></li>
 <li><code>stdlib-jdk7</code>,</li>
@@ -104,8 +104,9 @@ the following Kotlin Libraries are made available in the kotlin compiler reposit
 <p>So if you needed to add reflect as a dep use the following label <code>@com_github_jetbrains_kotlin//:reflect</code>.</p>
 <h3>Caveats</h3>
 <ul>
-<li>The compiler is currently not configurable.</li>
-<li><code>stdlib</code>, <code>stdlib-jdk7</code> and <code>stdlib-jdk8</code> are added by default to any compile operation.</li>
+<li>The compiler is currently not configurable <a href="https://github.com/hsyed/rules_kotlin/issues/3">issue</a>.</li>
+<li>The compiler is hardwired to target jdk8 and language and api levels "1.2" <a href="https://github.com/hsyed/rules_kotlin/issues/3">issue</a>.</li>
+<li><code>stdlib</code>, <code>stdlib-jdk7</code> and <code>stdlib-jdk8</code> are added by default to any compile operation <a href="https://github.com/hsyed/rules_kotlin/issues/3">issue</a>.</li>
 </ul>
 
           <hr>
@@ -114,7 +115,7 @@ the following Kotlin Libraries are made available in the kotlin compiler reposit
 
           <pre>kotlin_repositories(<a href="#kotlin_repositories.kotlin_release_version">kotlin_release_version</a>)</pre>
 
-          <p>Call this in a WORKSPACE to setup the Kotlin rules.</p>
+          <p>Call this in the WORKSPACE file to setup the Kotlin rules.</p>
 
 
           <h3 id="kotlin_repositories_args">Attributes</h3>
@@ -207,23 +208,23 @@ make variable substition.</p>
       <td><code>resource_jars</code></td>
       <td>
         <p><code>List of <a href="https://bazel.build/docs/build-ref.html#labels">labels</a>; Optional; Default is []</code></p>
-        <p>Set of archives containing Java resources.If specified, the contents of these jars are merged into the
-output jar.</p>
+        <p>Set of archives containing Java resources. If specified, the contents of these jars are merged into the output jar.</p>
       </td>
     </tr>
     <tr id="kotlin_binary.resource_strip_prefix">
       <td><code>resource_strip_prefix</code></td>
       <td>
         <p><code>String; Optional; Default is ''</code></p>
-        <p>The path prefix to strip from Java resources.</p>
+        <p>The path prefix to strip from Java resources, files residing under common prefix such as <code>src/main/resources</code> or <code>src/test/resources</code>
+will have stripping applied by convention.</p>
       </td>
     </tr>
     <tr id="kotlin_binary.runtime_deps">
       <td><code>runtime_deps</code></td>
       <td>
         <p><code>List of <a href="https://bazel.build/docs/build-ref.html#labels">labels</a>; Optional; Default is []</code></p>
-        <p>Libraries to make available to the final binary or test at runtime only. Like ordinary deps, these will
-appear on the runtime classpath, but unlike them, not on the compile-time classpath.</p>
+        <p>Libraries to make available to the final binary or test at runtime only. Like ordinary deps, these will appear on the runtime classpath, but
+unlike them, not on the compile-time classpath.</p>
       </td>
     </tr>
   </tbody>
@@ -278,7 +279,7 @@ appear on the runtime classpath, but unlike them, not on the compile-time classp
       <td>
         <p><code>List of <a href="https://bazel.build/docs/build-ref.html#labels">labels</a>; Optional; Default is []</code></p>
         <p>Exported libraries.</p>
-<p>Listing rules here will make them available to parent rules, as if the parents explicitly depended on these rules.
+<p>Deps listed here will be made available to other rules, as if the parents explicitly depended on these deps.
 This is not true for regular (non-exported) deps.</p>
       </td>
     </tr>
@@ -286,23 +287,23 @@ This is not true for regular (non-exported) deps.</p>
       <td><code>resource_jars</code></td>
       <td>
         <p><code>List of <a href="https://bazel.build/docs/build-ref.html#labels">labels</a>; Optional; Default is []</code></p>
-        <p>Set of archives containing Java resources.If specified, the contents of these jars are merged into the
-output jar.</p>
+        <p>Set of archives containing Java resources. If specified, the contents of these jars are merged into the output jar.</p>
       </td>
     </tr>
     <tr id="kotlin_library.resource_strip_prefix">
       <td><code>resource_strip_prefix</code></td>
       <td>
         <p><code>String; Optional; Default is ''</code></p>
-        <p>The path prefix to strip from Java resources.</p>
+        <p>The path prefix to strip from Java resources, files residing under common prefix such as <code>src/main/resources</code> or <code>src/test/resources</code>
+will have stripping applied by convention.</p>
       </td>
     </tr>
     <tr id="kotlin_library.runtime_deps">
       <td><code>runtime_deps</code></td>
       <td>
         <p><code>List of <a href="https://bazel.build/docs/build-ref.html#labels">labels</a>; Optional; Default is []</code></p>
-        <p>Libraries to make available to the final binary or test at runtime only. Like ordinary deps, these will
-appear on the runtime classpath, but unlike them, not on the compile-time classpath.</p>
+        <p>Libraries to make available to the final binary or test at runtime only. Like ordinary deps, these will appear on the runtime classpath, but
+unlike them, not on the compile-time classpath.</p>
       </td>
     </tr>
   </tbody>
@@ -371,23 +372,23 @@ make variable substition.</p>
       <td><code>resource_jars</code></td>
       <td>
         <p><code>List of <a href="https://bazel.build/docs/build-ref.html#labels">labels</a>; Optional; Default is []</code></p>
-        <p>Set of archives containing Java resources.If specified, the contents of these jars are merged into the
-output jar.</p>
+        <p>Set of archives containing Java resources. If specified, the contents of these jars are merged into the output jar.</p>
       </td>
     </tr>
     <tr id="kotlin_test.resource_strip_prefix">
       <td><code>resource_strip_prefix</code></td>
       <td>
         <p><code>String; Optional; Default is ''</code></p>
-        <p>The path prefix to strip from Java resources.</p>
+        <p>The path prefix to strip from Java resources, files residing under common prefix such as <code>src/main/resources</code> or <code>src/test/resources</code>
+will have stripping applied by convention.</p>
       </td>
     </tr>
     <tr id="kotlin_test.runtime_deps">
       <td><code>runtime_deps</code></td>
       <td>
         <p><code>List of <a href="https://bazel.build/docs/build-ref.html#labels">labels</a>; Optional; Default is []</code></p>
-        <p>Libraries to make available to the final binary or test at runtime only. Like ordinary deps, these will
-appear on the runtime classpath, but unlike them, not on the compile-time classpath.</p>
+        <p>Libraries to make available to the final binary or test at runtime only. Like ordinary deps, these will appear on the runtime classpath, but
+unlike them, not on the compile-time classpath.</p>
       </td>
     </tr>
     <tr id="kotlin_test.test_class">

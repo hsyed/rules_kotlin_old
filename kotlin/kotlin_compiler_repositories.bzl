@@ -112,7 +112,6 @@ def kotlin_compiler_repository(
         sha1 = "b32aba0cbe737a4ca953f71688725972e3ee927c",
     )
 
-
     native.http_file(
         name = "kt_java_stub_template",
         url = ("https://raw.githubusercontent.com/bazelbuild/bazel/" +
