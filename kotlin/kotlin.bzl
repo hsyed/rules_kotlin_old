@@ -219,13 +219,15 @@ kotlin_binary = rule(
     implementation = _kotlin_binary_impl,
 )
 
-"""Builds a Java archive ("jar file"), plus a wrapper shell script with the same name as the rule. The wrapper shell
-script uses a classpath that includes, among other things, a jar file for each library on which the binary depends.
+"""Builds a Java archive ("jar file"), plus a wrapper shell script with the same name as the rule. The wrapper shell script uses a classpath that includes,
+among other things, a jar file for each library on which the binary depends.
+
+**Note:** This rule does not have all of the features found in [`java_binary`](https://docs.bazel.build/versions/master/be/java.html#java_binary). It is
+appropriate for building workspace utilities. `java_binary` should be preferred for release artefacts.
 
 Args:
   main_class: Name of class with main() method to use as entry point.
-  jvm_flags: A list of flags to embed in the wrapper script generated for running this binary. Note: does not yet support
-    make variable substition.
+  jvm_flags: A list of flags to embed in the wrapper script generated for running this binary. Note: does not yet support make variable substitution.
 """
 
 kotlin_test = rule(

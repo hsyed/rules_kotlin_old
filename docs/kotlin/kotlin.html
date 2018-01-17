@@ -142,8 +142,10 @@ chosen by default.</p>
 
           <pre>kotlin_binary(<a href="#kotlin_binary.name">name</a>, <a href="#kotlin_binary.deps">deps</a>, <a href="#kotlin_binary.data">data</a>, <a href="#kotlin_binary.resources">resources</a>, <a href="#kotlin_binary.srcs">srcs</a>, <a href="#kotlin_binary.jvm_flags">jvm_flags</a>, <a href="#kotlin_binary.main_class">main_class</a>, <a href="#kotlin_binary.resource_jars">resource_jars</a>, <a href="#kotlin_binary.resource_strip_prefix">resource_strip_prefix</a>, <a href="#kotlin_binary.runtime_deps">runtime_deps</a>)</pre>
 
-          <p>Builds a Java archive ("jar file"), plus a wrapper shell script with the same name as the rule. The wrapper shell
-script uses a classpath that includes, among other things, a jar file for each library on which the binary depends.</p>
+          <p>Builds a Java archive ("jar file"), plus a wrapper shell script with the same name as the rule. The wrapper shell script uses a classpath that includes,
+among other things, a jar file for each library on which the binary depends.</p>
+<p><strong>Note:</strong> This rule does not have all of the features found in <a href="https://docs.bazel.build/versions/master/be/java.html#java_binary"><code>java_binary</code></a>. It is
+appropriate for building workspace utilities. <code>java_binary</code> should be preferred for release artefacts.</p>
 
 
           <h3 id="kotlin_binary_args">Attributes</h3>
@@ -193,8 +195,7 @@ script uses a classpath that includes, among other things, a jar file for each l
       <td><code>jvm_flags</code></td>
       <td>
         <p><code>List of strings; Optional; Default is []</code></p>
-        <p>A list of flags to embed in the wrapper script generated for running this binary. Note: does not yet support
-make variable substition.</p>
+        <p>A list of flags to embed in the wrapper script generated for running this binary. Note: does not yet support make variable substitution.</p>
       </td>
     </tr>
     <tr id="kotlin_binary.main_class">
@@ -364,8 +365,7 @@ unlike them, not on the compile-time classpath.</p>
       <td><code>jvm_flags</code></td>
       <td>
         <p><code>List of strings; Optional; Default is []</code></p>
-        <p>A list of flags to embed in the wrapper script generated for running this binary. Note: does not yet support
-make variable substition.</p>
+        <p>A list of flags to embed in the wrapper script generated for running this binary. Note: does not yet support make variable substitution.</p>
       </td>
     </tr>
     <tr id="kotlin_test.resource_jars">

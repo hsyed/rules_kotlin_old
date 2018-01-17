@@ -124,7 +124,7 @@ def kotlin_maybe_make_srcs_action(ctx):
         )
         return [output_srcjar]
     else:
-        return None
+        return []
 
 # PACKAGE JARS #########################################################################################################
 def kotlin_fold_jars_action(ctx, output_jar, input_jars):
