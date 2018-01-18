@@ -190,7 +190,9 @@ load(
 )
 
 kotlin_library = rule(
-    attrs = dict(_common_attr.items() + {"exports": attr.label_list()}.items()),
+    attrs = dict(_common_attr.items() + {
+        "exports": attr.label_list(default=[])
+    }.items()),
     outputs = _common_outputs,
     implementation = _kotlin_library_impl,
 )

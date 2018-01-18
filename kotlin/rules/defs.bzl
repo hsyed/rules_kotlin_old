@@ -11,6 +11,5 @@ KotlinInfo = provider(
     fields = {
         "src": "the source files. [intelij-aspect]",
         "outputs": "output jars produced by this rule. [intelij-aspect]",
-        #   'transitive_exports': 'the transitive closure of all kotlin jars exported by this target'
     },
 )

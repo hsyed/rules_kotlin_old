@@ -98,24 +98,17 @@ def _make_java_provider(ctx, auto_deps=[]):
     A JavaInfo provider.
     """
     deps=_collect_all_jars(ctx.attr.deps)
+    exported_deps=_collect_all_jars(getattr(ctx.attr, "exports", []))
 
-    exported_deps=None
-    if hasattr(ctx.attr, "exports"):
-        exported_deps=_collect_all_jars(ctx.attr.exports)
-    else:
-        exported_deps=java_common.create_provider()
-
-
-    # The following logic operates under the assumption that compile and runtime jars are for conveying the "outputs" of
-    # a target, as mentioned on the bazel wiki. Therefore the compile_jars and runtime_jars of exported deps are treated
-    # like "outputs" of this rule.
     my_compile_jars = exported_deps.compile_jars + [ctx.outputs.jar]
-    my_runtime_jars = my_compile_jars
-    if hasattr(exported_deps, "runtime_jars"):
-        my_runtime_jars += exported_deps.runtime_jars
+    my_runtime_jars = exported_deps.runtime_jars + [ctx.outputs.jar]
 
     my_transitive_compile_jars = my_compile_jars + deps.transitive_compile_time_jars + exported_deps.transitive_compile_time_jars + auto_deps
-    my_transitive_runtime_jars = my_runtime_jars + exported_deps.transitive_runtime_jars + deps.transitive_runtime_jars + ctx.files.runtime_deps + [ctx.file._kotlin_runtime] + auto_deps
+    my_transitive_runtime_jars = my_runtime_jars + deps.transitive_runtime_jars + exported_deps.transitive_runtime_jars + [ctx.file._kotlin_runtime] + auto_deps
+
+    # collect the runtime jars from the runtime_deps attribute.
+    for jar in ctx.attr.runtime_deps:
+        my_transitive_runtime_jars += jar[JavaInfo].transitive_runtime_jars
 
     return java_common.create_provider(
         use_ijar = False,
@@ -124,7 +117,7 @@ def _make_java_provider(ctx, auto_deps=[]):
         source_jars=_kotlin_maybe_make_srcs_action(ctx),
         # A list or a set of jars that should be used at compilation for a given target.
         compile_time_jars = my_compile_jars,
-#        # A list or a set of jars that should be used at runtime for a given target.
+        # A list or a set of jars that should be used at runtime for a given target.
         runtime_jars=my_runtime_jars,
         transitive_compile_time_jars= my_transitive_compile_jars,
         transitive_runtime_jars=my_transitive_runtime_jars

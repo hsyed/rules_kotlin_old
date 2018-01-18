@@ -27,6 +27,7 @@ def collect_all_jars(deps):
     Merges a list of java providers into a struct of depsets.
     """
     compile_jars = depset()
+    runtime_jars = depset()
     transitive_runtime_jars = depset()
     transitive_compile_time_jars = depset()
 
@@ -34,11 +35,14 @@ def collect_all_jars(deps):
         if JavaInfo in dep_target:
             java_provider = dep_target[JavaInfo]
             compile_jars += java_provider.compile_jars
+            # the runtime_jar compile_jar seperation is here to support the exports concept.
+            runtime_jars += java_provider.full_compile_jars
             transitive_compile_time_jars += java_provider.transitive_compile_time_jars
             transitive_runtime_jars += java_provider.transitive_runtime_jars
 
     return struct (
         compile_jars = compile_jars,
+        runtime_jars = runtime_jars,
         transitive_runtime_jars = transitive_runtime_jars,
         transitive_compile_time_jars = transitive_compile_time_jars
     )
