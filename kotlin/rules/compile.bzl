@@ -28,10 +28,13 @@ def _kotlin_do_compile_action(ctx, output_jar, compile_jars, opts):
       opts: struct containing Kotlin compilation options.
     """
     args = [
-        "-d", output_jar.path,
-        "-cp", ":".join([f.path for f in compile_jars.to_list()]),
+        "--label", ctx.label,
+        "--output_classjar", output_jar.path,
+        "--output_jdeps", ctx.outputs.jdeps.path,
+        "--classpath", ":".join([f.path for f in compile_jars.to_list()]),
+        "--sources", ":".join([f.path for f in ctx.files.srcs]),
         # https://github.com/hsyed/rules_kotlin/issues/3.
-        "-jvm-target", "1.8", "-api-version", "1.2", "-language-version", "1.2"
+        "--kotlin_jvm_target", "1.8", "--kotlin_api_version", "1.2", "--kotlin_language_version", "1.2"
     ]
 
     # re-enable compilation options https://github.com/hsyed/rules_kotlin/issues/3.
@@ -47,20 +50,23 @@ def _kotlin_do_compile_action(ctx, output_jar, compile_jars, opts):
 #        args += ["-P"]
 #        args += ["plugin:%s=\"%s\"" % (k, v)]
 
-    args += [f.path for f in ctx.files.srcs]
-
     # Declare and write out argument file.
     args_file = ctx.actions.declare_file(ctx.label.name + "-worker.args")
     ctx.actions.write(args_file, "\n".join(args))
 
     # When a stratetegy isn't provided for the worker and the workspace is fresh then certain deps are not available under
     # external/@com_github_jetbrains_kotlin/... that is why the classpath is added explicetly.
-    compile_inputs = depset([args_file]) + ctx.files.srcs + compile_jars + ctx.files._kotlin_compiler_classpath
+    compile_inputs = (
+      depset([args_file]) +
+      ctx.files.srcs +
+      compile_jars +
+      ctx.files._kotlin_compiler_classpath +
+      ctx.files._jdk)
 
     ctx.action(
         mnemonic = "KotlinCompile",
         inputs = compile_inputs,
-        outputs = [output_jar],
+        outputs = [output_jar, ctx.outputs.jdeps],
         executable = ctx.executable._kotlinw,
         execution_requirements = {"supports-workers": "1"},
         arguments = ["@" + args_file.path],
@@ -127,9 +133,10 @@ def kotlin_make_providers(ctx, java_info, transitive_files=depset(order="default
     kotlin_info=_KotlinInfo(
         src=ctx.attr.srcs,
         outputs = struct(
+            jdeps = ctx.outputs.jdeps,
             jars = [struct(
               class_jar = ctx.outputs.jar,
-              ijar = None
+              ijar = None,
             )]
         ), # intelij aspect needs this.
     )

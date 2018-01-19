@@ -1,5 +1,6 @@
 test.smoke:
 	python -B tests/smoke/basic_tests.py
+	bazel test //kotlin/workers:unittests
 
 reformat:
 	buildifier -mode=fix -v kotlin/*.bzl

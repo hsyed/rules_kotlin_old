@@ -27,11 +27,11 @@ test --strategy=KotlinCompile=worker
 The Kotlin libraries that are bundled in a kotlin release should be used with the rules. After enabling the repository
 the following Kotlin Libraries are made available from the workspace `com_github_jetbrains_kotlin`:
 
-* `stdlib`
-* `stdlib-jdk7`,
-* `stdlib-jdk8`,
-* `test`,
-* `reflect`.
+* `kotlin-stdlib`
+* `kotlin-stdlib-jdk7`,
+* `kotlin-stdlib-jdk8`,
+* `kotlin-test`,
+* `kotlin-reflect`.
 
 So if you needed to add reflect as a dep use the following label `@com_github_jetbrains_kotlin//:reflect`.
 
@@ -39,7 +39,8 @@ So if you needed to add reflect as a dep use the following label `@com_github_je
 
 * The compiler is currently not configurable [issue](https://github.com/hsyed/rules_kotlin/issues/3).
 * The compiler is hardwired to target jdk8 and language and api levels "1.2" [issue](https://github.com/hsyed/rules_kotlin/issues/3).
-* `stdlib`, `stdlib-jdk7` and `stdlib-jdk8` are added by default to any compile operation [issue](https://github.com/hsyed/rules_kotlin/issues/3).
+* `kotlin-stdlib`, `kotlin-stdlib-jdk7` and `kotlin-stdlib-jdk8` are added by default to any compile operation
+  [issue](https://github.com/hsyed/rules_kotlin/issues/3).
 """
 # This file is the main import -- it shouldn't grow out of hand the reason it contains so much allready is due to the limitations of skydoc.
 
@@ -72,7 +73,7 @@ _implicit_deps = {
         ],
     ),
     "_kotlinw": attr.label(
-        default = Label("//kotlin/workers/compilers/jvm"),
+        default = Label("//kotlin/workers:compiler_jvm"),
         executable = True,
         cfg = "host",
     ),
@@ -108,6 +109,11 @@ _implicit_deps = {
         executable = True,
         cfg = "host",
         default = Label("@bazel_tools//tools/jdk:java"),
+        allow_files = True,
+    ),
+    "_jdk": attr.label(
+        default = Label("@bazel_tools//tools/jdk"),
+        cfg = "host",
         allow_files = True,
     ),
     "_java_stub_template": attr.label(default = Label("@kt_java_stub_template//file")),
@@ -152,6 +158,7 @@ _runnable_common_attr = dict(_common_attr.items() + {
 ########################################################################################################################
 _common_outputs = dict(
     jar = "%{name}.jar",
+    jdeps = "%{name}.jdeps",
     srcjar = "%{name}-sources.jar",
 )
 
@@ -191,7 +198,7 @@ load(
 
 kotlin_library = rule(
     attrs = dict(_common_attr.items() + {
-        "exports": attr.label_list(default=[])
+        "exports": attr.label_list(default = []),
     }.items()),
     outputs = _common_outputs,
     implementation = _kotlin_library_impl,

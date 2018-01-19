@@ -22,6 +22,7 @@ KOTLIN_RELEASES = {
 }
 
 KOTLIN_COMPILER_REPO_BUILD_FILE = """
+load("@io_bazel_rules_kotlin//kotlin/rules:bootstrap.bzl", kotlin_stdlib="kotlin_stdlib")
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
@@ -29,35 +30,48 @@ filegroup(
     srcs = glob(["lib/*.jar"], exclude = ["lib/*-sources.jar"]),
 )
 
-java_import(
-    name = "runtime",
+kotlin_stdlib(
+    name = "kotlin-runtime",
     jars = ["lib/kotlin-runtime.jar"],
     srcjar = "lib/kotlin-runtime-sources.jar"
 )
 
-java_import(
-    name = "stdlib",
+kotlin_stdlib(
+    name = "kotlin-stdlib",
     jars = ["lib/kotlin-stdlib.jar"],
     srcjar = "lib/kotlin-stdlib-sources.jar"
 )
 
-java_import(
-    name = "stdlib-jdk7",
+kotlin_stdlib(
+    name = "kotlin-stdlib-jdk7",
     jars = ["lib/kotlin-stdlib-jdk7.jar"],
     srcjar = "lib/kotlin-stdlib-jdk7-sources.jar"
 )
 
-java_import(
-    name = "stdlib-jdk8",
+kotlin_stdlib(
+    name = "kotlin-stdlib-jdk8",
     jars = ["lib/kotlin-stdlib-jdk8.jar"],
     srcjar = "lib/kotlin-stdlib-jdk8-sources.jar"
 )
 
-java_import(
-    name = "reflect",
+kotlin_stdlib(
+    name = "kotlin-reflect",
     jars = ["lib/kotlin-reflect.jar"],
     srcjar = "lib/kotlin-reflect-sources.jar"
 )
+
+kotlin_stdlib(
+    name = "kotlin-test",
+    jars = ["lib/kotlin-test.jar"],
+    srcjar = "lib/kotlin-test-sources.jar"
+)
+
+alias(name="runtime", actual="kotlin-runtime")
+alias(name="stdlib", actual="kotlin-stdlib")
+alias(name="stdlib-jdk7", actual="kotlin-stdlib-jdk7")
+alias(name="stdlib-jdk8", actual="kotlin-stdlib-jdk8")
+alias(name="reflect", actual="kotlin-reflect")
+alias(name="test", actual="kotlin-test")
 
 java_import(
     name = "compiler",
@@ -72,11 +86,6 @@ java_import(
 java_import(
     name = "preloader",
     jars = ["lib/kotlin-preloader.jar"],
-)
-
-java_import(
-    name = "test",
-    jars = ["lib/kotlin-test.jar"],
 )
 
 sh_binary(
