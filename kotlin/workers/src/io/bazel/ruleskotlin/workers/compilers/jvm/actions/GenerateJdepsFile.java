@@ -45,12 +45,12 @@ public final class GenerateJdepsFile implements BuildAction {
 
     @Override
     public Integer apply(BuildContext ctx) {
-        try {
-            final String
-                    classJar = OUTPUT_CLASSJAR.get(ctx),
-                    classPath = CLASSPATH.get(ctx),
-                    output = OUTPUT_JDEPS.get(ctx);
+        final String
+                classJar = OUTPUT_CLASSJAR.get(ctx),
+                classPath = CLASSPATH.get(ctx),
+                output = OUTPUT_JDEPS.get(ctx);
 
+        try {
             String[] jdepLines = executeCommand(classJar, classPath);
             Deps.Dependencies jdepsContent = JdepsParser.parse(
                     LABEL.get(ctx),
@@ -67,6 +67,7 @@ public final class GenerateJdepsFile implements BuildAction {
             FileOutputStream fileOutputStream = new FileOutputStream(file);
             jdepsContent.writeTo(fileOutputStream);
         } catch (Exception e) {
+            System.err.println("failed generating jdeps file for artifact: " + classJar);
             e.printStackTrace(System.err);
             return 1;
         }

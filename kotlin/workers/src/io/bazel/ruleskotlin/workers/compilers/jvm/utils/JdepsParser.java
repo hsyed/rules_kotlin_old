@@ -29,19 +29,15 @@ import java.util.stream.Stream;
 public class JdepsParser {
     private final String filename;
     private final String packageSuffix;
-    private final Predicate<String> isImplict;
-    private final Result result;
+    private final Predicate<String> isImplicit;
 
-    public static class Result {
-        final Map<String, Deps.Dependency.Builder> depMap = new HashMap<>();
-        final Set<String> packages = new HashSet<>();
-    }
+    private final Map<String, Deps.Dependency.Builder> depMap = new HashMap<>();
+    private final Set<String> packages = new HashSet<>();
 
-    private JdepsParser(String filename, Predicate<String> isImplict) {
+    private JdepsParser(String filename, Predicate<String> isImplicit) {
         this.filename = filename;
         this.packageSuffix = " (" + filename + ")";
-        this.isImplict = isImplict;
-        result = new Result();
+        this.isImplicit = isImplicit;
     }
 
     private void consumeJarLine(String classJarPath, Deps.Dependency.Kind kind) {
@@ -50,12 +46,12 @@ public class JdepsParser {
         // ignore absolute files, -- jdk jar paths etc.
         // only process jar files
         if (!(path.isAbsolute() || !classJarPath.endsWith(".jar"))) {
-            Deps.Dependency.Builder entry = result.depMap.computeIfAbsent(classJarPath, (key) -> {
+            Deps.Dependency.Builder entry = depMap.computeIfAbsent(classJarPath, (key) -> {
                 Deps.Dependency.Builder depBuilder = Deps.Dependency.newBuilder();
                 depBuilder.setPath(classJarPath);
                 depBuilder.setKind(kind);
 
-                if (isImplict.test(classJarPath)) {
+                if (isImplicit.test(classJarPath)) {
                     depBuilder.setKind(Deps.Dependency.Kind.IMPLICIT);
                 }
                 return depBuilder;
@@ -68,17 +64,16 @@ public class JdepsParser {
         }
     }
 
-        private enum Mode {
-            COLLECT_DEPS,
-            DETERMINE_JDK,
-            COLLECT_PACKAGES_JDK8,
-            COLLECT_PACKAGES_JDK9
-        }
+    private enum Mode {
+        COLLECT_DEPS,
+        DETERMINE_JDK,
+        COLLECT_PACKAGES_JDK8,
+        COLLECT_PACKAGES_JDK9
+    }
 
-        private Mode mode = Mode.COLLECT_DEPS;
+    private Mode mode = Mode.COLLECT_DEPS;
 
-        // maybe simplify this by tokenizing on whitespace and arrows.
-
+    // maybe simplify this by tokenizing on whitespace and arrows.
     private void processLine(String line) {
         String trimmedLine = line.trim();
         switch (mode) {
@@ -105,20 +100,20 @@ public class JdepsParser {
                 break;
             case COLLECT_PACKAGES_JDK8:
                 if (trimmedLine.endsWith(packageSuffix)) {
-                    result.packages.add(trimmedLine.substring(0, trimmedLine.length() - packageSuffix.length()));
+                    packages.add(trimmedLine.substring(0, trimmedLine.length() - packageSuffix.length()));
                 } else if (trimmedLine.startsWith("-> ")) {
-                    // ignore package detail lines
+                    // ignore package detail lines, in the jdk8 format these start with arrows.
                 } else throw new RuntimeException("unexpected line while collecting packages: " + line);
                 break;
             case COLLECT_PACKAGES_JDK9:
                 String[] pkg = trimmedLine.split("\\s+");
-                result.packages.add(pkg[0]);
+                packages.add(pkg[0]);
                 break;
         }
     }
 
 
-    public static Predicate<String> pathSuffixMatchingPredicate(Path directory, String ... jars) {
+    public static Predicate<String> pathSuffixMatchingPredicate(Path directory, String... jars) {
         String[] suffixes = Stream.of(jars).map(lib -> directory.resolve(lib).toString()).toArray(String[]::new);
         return (jar) -> {
             for (String implicitJarsEnding : suffixes) {
@@ -130,9 +125,9 @@ public class JdepsParser {
         };
     }
 
-    public static Deps.Dependencies parse(String label, String classJar, String classPath, Stream<String> jdepLines, Predicate<String> isImplict) {
+    public static Deps.Dependencies parse(String label, String classJar, String classPath, Stream<String> jdepLines, Predicate<String> isImplicit) {
         String filename = Paths.get(classJar).getFileName().toString();
-        JdepsParser jdepsParser = new JdepsParser(filename, isImplict);
+        JdepsParser jdepsParser = new JdepsParser(filename, isImplicit);
         Stream.of(classPath.split(":")).forEach(x -> jdepsParser.consumeJarLine(x, Deps.Dependency.Kind.UNUSED));
         jdepLines.forEach(jdepsParser::processLine);
 
@@ -140,8 +135,8 @@ public class JdepsParser {
         rootBuilder.setSuccess(false);
         rootBuilder.setRuleLabel(label);
 
-        rootBuilder.addAllContainedPackage(jdepsParser.result.packages);
-        jdepsParser.result.depMap.values().forEach(b -> rootBuilder.addDependency(b.build()));
+        rootBuilder.addAllContainedPackage(jdepsParser.packages);
+        jdepsParser.depMap.values().forEach(b -> rootBuilder.addDependency(b.build()));
 
         rootBuilder.setSuccess(true);
         return rootBuilder.build();
