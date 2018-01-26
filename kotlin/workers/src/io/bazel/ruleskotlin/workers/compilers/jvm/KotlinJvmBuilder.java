@@ -52,7 +52,7 @@ public final class KotlinJvmBuilder implements CommandLineProgram {
         BazelWorker<KotlinJvmBuilder> kotlinCompilerBazelWorker = new BazelWorker<>(
                 kotlinBuilder,
                 System.err,
-                "KotlinMainCompile"
+                "KotlinCompile"
         );
         System.exit(kotlinCompilerBazelWorker.apply(args));
     }
