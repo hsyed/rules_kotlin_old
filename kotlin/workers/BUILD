@@ -18,7 +18,7 @@ java_binary(
 
 java_test(
     name = "unittests",
-    test_class = "io.bazel.ruleskotlin.workers.compilers.jvm.utils.JdepsTest",
+    test_class = "io.bazel.ruleskotlin.workers.compilers.jvm.utils.JdepsParserTest",
     srcs = glob(["unittests/**/*.java"]),
     deps = ["lib"],
     size = "small"

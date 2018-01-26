@@ -16,8 +16,8 @@
 package io.bazel.ruleskotlin.workers;
 
 
-
 import com.google.devtools.build.lib.worker.WorkerProtocol;
+import io.bazel.ruleskotlin.workers.compilers.jvm.utils.Utils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -50,17 +49,17 @@ public final class BazelWorker<T extends CommandLineProgram> implements CommandL
     }
 
     @Override
-    public Integer apply(Stream<String> args) {
-        List<String> argList = args.collect(Collectors.toList());
-        if (argList.contains("--persistent_worker")) {
-            return runAsPersistentWorker(argList.stream());
-        } else {
-            return delegate.apply(loadArguments(argList, false).stream());
+    public Integer apply(List<String> args) {
+        for (String arg : args) {
+            if (arg.equals("--persistent_worker")) {
+                return runAsPersistentWorker(args);
+            }
         }
+        return delegate.apply(loadArguments(args, false));
     }
 
     @SuppressWarnings("unused")
-    private int runAsPersistentWorker(Stream<String> ignored) {
+    private int runAsPersistentWorker(List<String> ignored) {
         InputStream realStdIn = System.in;
         PrintStream realStdOut = System.out;
         PrintStream realStdErr = System.err;
@@ -78,7 +77,7 @@ public final class BazelWorker<T extends CommandLineProgram> implements CommandL
                 int exitCode;
 
                 try {
-                    exitCode = delegate.apply(loadArguments(request.getArgumentsList(),true).stream());
+                    exitCode = delegate.apply(loadArguments(request.getArgumentsList(), true));
                 } catch (RuntimeException e) {
                     if (wasInterrupted(e)) {
                         return 0;
@@ -111,7 +110,7 @@ public final class BazelWorker<T extends CommandLineProgram> implements CommandL
     }
 
     private List<String> loadArguments(List<String> args, boolean isWorker) {
-        if(args.size() > 0) {
+        if (args.size() > 0) {
             String lastArg = args.get(args.size() - 1);
 
             if (lastArg.startsWith("@")) {
@@ -136,16 +135,12 @@ public final class BazelWorker<T extends CommandLineProgram> implements CommandL
     }
 
     private boolean wasInterrupted(Throwable e) {
-        Throwable cause = getRootCause(e);
+        Throwable cause = Utils.getRootCause(e);
         if (cause instanceof InterruptedException
                 || cause instanceof InterruptedIOException) {
             output.println("Terminating worker due to interrupt signal");
             return true;
         }
         return false;
-    }
-
-    private static Throwable getRootCause(Throwable e) {
-        return Stream.iterate(e, Throwable::getCause).filter(element -> element.getCause() == null).findFirst().get();
     }
 }

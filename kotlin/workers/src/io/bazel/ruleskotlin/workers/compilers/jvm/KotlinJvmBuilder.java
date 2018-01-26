@@ -20,25 +20,26 @@ import io.bazel.ruleskotlin.workers.BazelWorker;
 import io.bazel.ruleskotlin.workers.CommandLineProgram;
 import io.bazel.ruleskotlin.workers.compilers.jvm.actions.BuildAction;
 import io.bazel.ruleskotlin.workers.compilers.jvm.actions.GenerateJdepsFile;
-import io.bazel.ruleskotlin.workers.compilers.jvm.actions.KotlinCompileClassJar;
+import io.bazel.ruleskotlin.workers.compilers.jvm.actions.KotlinCreateClassJar;
+import io.bazel.ruleskotlin.workers.compilers.jvm.actions.KotlinMainCompile;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * Bazel Kotlin Compiler worker.
  */
 public final class KotlinJvmBuilder implements CommandLineProgram {
-    private BuildAction[] compileAction = new BuildAction[] {
-            KotlinCompileClassJar.INSTANCE,
+    private static final BuildAction[] compileActions = new BuildAction[] {
+            KotlinMainCompile.INSTANCE,
+            KotlinCreateClassJar.INSTANCE,
             GenerateJdepsFile.INSTANCE,
     };
 
     @Override
-    public Integer apply(Stream<String> args) {
-        BuildContext context = BuildContext.from(args);
+    public Integer apply(List<String> args) {
+        Context context = Context.from(args);
         Integer exitCode = 0;
-        for (BuildAction action : compileAction) {
+        for (BuildAction action : compileActions) {
             exitCode = action.apply(context);
             if(exitCode != 0)
                 break;
@@ -51,8 +52,8 @@ public final class KotlinJvmBuilder implements CommandLineProgram {
         BazelWorker<KotlinJvmBuilder> kotlinCompilerBazelWorker = new BazelWorker<>(
                 kotlinBuilder,
                 System.err,
-                "KotlinCompile"
+                "KotlinMainCompile"
         );
-        kotlinCompilerBazelWorker.apply(Arrays.stream(args));
+        System.exit(kotlinCompilerBazelWorker.apply(args));
     }
 }

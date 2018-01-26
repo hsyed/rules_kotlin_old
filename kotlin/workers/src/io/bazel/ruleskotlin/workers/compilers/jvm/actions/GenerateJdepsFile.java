@@ -16,22 +16,22 @@
 package io.bazel.ruleskotlin.workers.compilers.jvm.actions;
 
 import com.google.devtools.build.lib.view.proto.Deps;
+import io.bazel.ruleskotlin.workers.compilers.jvm.Context;
+import io.bazel.ruleskotlin.workers.compilers.jvm.Locations;
 import io.bazel.ruleskotlin.workers.compilers.jvm.utils.JdepsParser;
-import io.bazel.ruleskotlin.workers.compilers.jvm.BuildContext;
+import io.bazel.ruleskotlin.workers.compilers.jvm.utils.Utils;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static io.bazel.ruleskotlin.workers.compilers.jvm.BuildContext.Field.*;
+import static io.bazel.ruleskotlin.workers.compilers.jvm.Flag.*;
 
 public final class GenerateJdepsFile implements BuildAction {
-    private static final String JDEPS_PATH = Paths.get("external", "local_jdk", "bin", "jdeps").toString();
+    private static final String JDEPS_PATH = Locations.JAVA_HOME.resolveVerified("bin", "jdeps").toString();
 
     private static final Predicate<String> IS_KOTLIN_IMPLICIT = JdepsParser.pathSuffixMatchingPredicate(
             Paths.get("external", "com_github_jetbrains_kotlin", "lib"),
@@ -39,52 +39,41 @@ public final class GenerateJdepsFile implements BuildAction {
             "kotlin-stdlib-jdk7.jar",
             "kotlin-stdlib-jdk8.jar");
 
-    public static GenerateJdepsFile INSTANCE = new GenerateJdepsFile();
+    public static final GenerateJdepsFile INSTANCE = new GenerateJdepsFile();
 
-    private GenerateJdepsFile() {}
+    private GenerateJdepsFile() {
+    }
 
     @Override
-    public Integer apply(BuildContext ctx) {
+    public Integer apply(Context ctx) {
         final String
                 classJar = OUTPUT_CLASSJAR.get(ctx),
                 classPath = CLASSPATH.get(ctx),
                 output = OUTPUT_JDEPS.get(ctx);
-
+        Deps.Dependencies jdepsContent;
         try {
-            String[] jdepLines = executeCommand(classJar, classPath);
-            Deps.Dependencies jdepsContent = JdepsParser.parse(
+            List<String> jdepLines = Utils.waitForOutput(new String[]{JDEPS_PATH, "-cp", classPath, classJar}, System.err);
+            jdepsContent = JdepsParser.parse(
                     LABEL.get(ctx),
                     classJar,
                     classPath,
-                    Stream.of(jdepLines),
+                    jdepLines.stream(),
                     IS_KOTLIN_IMPLICIT
             );
-            File file = new File(output);
-            if(file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            jdepsContent.writeTo(fileOutputStream);
         } catch (Exception e) {
-            System.err.println("failed generating jdeps file for artifact: " + classJar);
-            e.printStackTrace(System.err);
-            return 1;
+            throw new RuntimeException("error reading or parsing jdeps file", Utils.getRootCause(e));
         }
-        return 0;
-    }
 
-    private static String[] executeCommand(String classJarPath, String compileClasspath) throws Exception {
-        String command = Stream.of(JDEPS_PATH, "-cp", compileClasspath, classJarPath).collect(Collectors.joining(" "));
-        Process process = Runtime.getRuntime().exec(command);
-        try (
-                BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                BufferedReader errInput = new BufferedReader(new InputStreamReader(process.getErrorStream()))
-        ) {
-            int status = process.waitFor();
-            if (status != 0)
-                throw new RuntimeException("could not get jdeps, status: " + status + "error:\n" + errInput.lines().collect(Collectors.joining("\n")));
-            return stdInput.lines().toArray(String[]::new);
+        try {
+            Path outputPath = Paths.get(output);
+            Files.deleteIfExists(outputPath);
+            try (FileOutputStream fileOutputStream = new FileOutputStream(Files.createFile(outputPath).toFile())) {
+                jdepsContent.writeTo(fileOutputStream);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("error writing out jdeps file", Utils.getRootCause(e));
         }
+
+        return 0;
     }
 }

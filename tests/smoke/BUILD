@@ -87,3 +87,9 @@ kotlin_binary(
     main_class= "helloworld.Main",
     data=glob(["data/*"]),
 )
+
+kotlin_binary(
+    name = "hellojava",
+    srcs = ["hellojava/HelloWorld.kt", "hellojava/MessageHolder.java"],
+    main_class = "hellojava.HelloWorldKt"
+)

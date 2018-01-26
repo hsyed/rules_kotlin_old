@@ -15,10 +15,10 @@
  */
 package io.bazel.ruleskotlin.workers.compilers.jvm.actions;
 
-import io.bazel.ruleskotlin.workers.compilers.jvm.BuildContext;
+import io.bazel.ruleskotlin.workers.compilers.jvm.Context;
 
 import java.util.function.Function;
 
-public interface BuildAction extends Function<BuildContext, Integer> {
+public interface BuildAction extends Function<Context, Integer> {
 
 }

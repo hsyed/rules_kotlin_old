@@ -11,7 +11,7 @@ git_repository(
     commit = "<COMMIT_HASH>",
 )
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories")
-kotlin_repositories(kotlin_release_version = "1.2.10")
+kotlin_repositories(kotlin_release_version = "1.2.20")
 ```
 
 To enable persistent worker support, add the following to the appropriate `bazelrc` file:
@@ -24,12 +24,9 @@ test --strategy=KotlinCompile=worker
 
 ### Standard Libraries
 
-The Kotlin libraries that are bundled in a kotlin release should be used with the rules. After enabling the repository
-the following Kotlin Libraries are made available from the workspace `com_github_jetbrains_kotlin`:
+The Kotlin libraries that are bundled in a kotlin release should be used with the rules, the mandatory standard libraries are added implicetly. After enabling
+the repository the following Kotlin Libraries are also made available from the workspace `com_github_jetbrains_kotlin`:
 
-* `kotlin-stdlib`
-* `kotlin-stdlib-jdk7`,
-* `kotlin-stdlib-jdk8`,
 * `kotlin-test`,
 * `kotlin-reflect`.
 
@@ -39,8 +36,6 @@ So if you needed to add reflect as a dep use the following label `@com_github_je
 
 * The compiler is currently not configurable [issue](https://github.com/hsyed/rules_kotlin/issues/3).
 * The compiler is hardwired to target jdk8 and language and api levels "1.2" [issue](https://github.com/hsyed/rules_kotlin/issues/3).
-* `kotlin-stdlib`, `kotlin-stdlib-jdk7` and `kotlin-stdlib-jdk8` are added by default to any compile operation
-  [issue](https://github.com/hsyed/rules_kotlin/issues/3).
 """
 # This file is the main import -- it shouldn't grow out of hand the reason it contains so much allready is due to the limitations of skydoc.
 
@@ -51,7 +46,10 @@ So if you needed to add reflect as a dep use the following label `@com_github_je
 load("//kotlin/rules:defs.bzl", "KOTLIN_REPO_ROOT")
 
 # The files types that may be passed to the core Kotlin compile rule.
-_kt_compile_filetypes = FileType([".kt"])
+_kt_compile_filetypes = FileType([
+    ".kt",
+    ".java",
+])
 
 _jar_filetype = FileType([".jar"])
 
@@ -116,6 +114,11 @@ _implicit_deps = {
         cfg = "host",
         allow_files = True,
     ),
+    #    "_langtools": attr.label(
+    #        default = Label("@bazel_tools//tools/jdk:langtools"),
+    #        cfg = "host",
+    #        allow_files = True
+    #    ),
     "_java_stub_template": attr.label(default = Label("@kt_java_stub_template//file")),
 }
 
@@ -204,9 +207,10 @@ kotlin_library = rule(
     implementation = _kotlin_library_impl,
 )
 
-"""This rule compiles and links Kotlin sources into a .jar file.
+"""This rule compiles and links Kotlin and Java sources into a .jar file.
 Args:
-  srcs: The list of source files that are processed to create the target.
+  srcs: The list of source files that are processed to create the target, this can contain both Java and Kotlin files. Java analysis occurs first so Kotlin
+    classes may depend on Java classes in the same compilation unit.
   exports: Exported libraries.
 
     Deps listed here will be made available to other rules, as if the parents explicitly depended on these deps.

@@ -12,6 +12,7 @@ This is a fork of the pubref kotlin rules. Detailed documentation is incoming. T
 compile releases from JB -- pick them up from here (later: make the toolchain configurable).
 * Persistent worker support was missing, worker protocol in pubref had other issues.
 * The compiler depends on common external dependencies which aren't strictly needed (dagger, guava).
+* Mixed-Mode compilation.
 
 
 ### Next steps:

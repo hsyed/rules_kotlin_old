@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RunWith(JUnit4.class)
-public class JdepsTest {
+public class JdepsParserTest {
     private static final String JDK8_FIXTURE =
             "alt.jar -> bazel-server-cloud/external/com_github_jetbrains_kotlin/lib/kotlin-stdlib-jdk7.jar\n" +
                     "alt.jar -> bazel-server-cloud/external/com_github_jetbrains_kotlin/lib/kotlin-stdlib.jar\n" +

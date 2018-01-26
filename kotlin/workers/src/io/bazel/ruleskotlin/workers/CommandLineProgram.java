@@ -16,15 +16,16 @@
 package io.bazel.ruleskotlin.workers;
 
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Interface for command line programs.
  * <p>
  * <p>This is the same thing as a main function, except not static.
  */
-public interface CommandLineProgram extends Function<Stream<String>, Integer> {
+public interface CommandLineProgram extends Function<List<String>, Integer> {
 
     /**
      * Runs blocking program start to finish.
@@ -36,5 +37,9 @@ public interface CommandLineProgram extends Function<Stream<String>, Integer> {
      * @return program exit code, i.e. 0 for success, non-zero for failure
      */
     @Override
-    Integer apply(Stream<String> args);
+    Integer apply(List<String> args);
+
+    default Integer apply(String[] args) {
+        return apply(Arrays.asList(args));
+    }
 }

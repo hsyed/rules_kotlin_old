@@ -48,5 +48,6 @@ public class KotlinCompilerOutputProcessor {
         new BufferedReader(new InputStreamReader(new ByteArrayInputStream(byteArrayOutputStream.toByteArray())))
                 .lines()
                 .forEach(line -> delegate.println(line.replace(executionRoot, "")));
+        delegate.flush();
     }
 }

@@ -32,7 +32,7 @@ class TestRules(BazelKotlinTestCase):
     def test_bin_targets_launch_correctly_with_data(self):
         self.buildLaunchExpectingSuccess("helloworld")
 
-    def test_bin_targets_launch_correctly_with_data(self):
+    def test_conventional_strip_resources(self):
         jar = self.buildJarGetZipFile("conventional_strip_resources", "jar")
         self.assertJarContains(jar, "main.txt", "test.txt")
 
@@ -45,9 +45,11 @@ class TestRules(BazelKotlinTestCase):
     def test_export_rt_propagation(self):
         self.buildLaunchExpectingSuccess("propagation_rt_via_export_consumer")
 
-    def test_export_rt_propagation(self):
+    def test_export_rt_propagation_via_dep(self):
         self.buildLaunchExpectingSuccess("propagation_rt_via_runtime_deps_consumer")
 
+    def test_mixed_mode_compilation(self):
+        self.buildLaunchExpectingSuccess("hellojava")
     # # TODO what are the kotlin src jar conventions with regards to package positioning ?
         # def test_srcjar(self):
         #     jar = self.buildJarGetZipFile("testresources", "srcjar")

@@ -5,7 +5,10 @@ directories:
 
 targets:
   //kotlin/workers/...
-  //tests/smoke/...
+  -//tests/smoke/...
+
+test_sources:
+  */unittests/*
 
 kotlin_language_version: 1.2
 
