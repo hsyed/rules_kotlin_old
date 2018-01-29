@@ -1,3 +1,16 @@
+# Copyright 2018 The Bazel Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import unittest
 
 from common import BazelKotlinTestCase
@@ -21,10 +34,6 @@ class TestRules(BazelKotlinTestCase):
         jar = self.buildJarGetZipFile("test_embed_resources_strip_prefix", "jar")
         self.assertJarContains(jar, "testresources/AClass.class", "testresources/BClass.class")
         self.assertJarContains(jar, "one/two/aFile.txt", "one/alsoAFile.txt")
-
-    def test_conventional_strip_resources(self):
-        jar = self.buildJarGetZipFile("conventional_strip_resources", "jar")
-        self.assertJarContains(jar, "main.txt", "test.txt")
 
     def test_test_targets_launch_correctly(self):
         self.buildLaunchExpectingSuccess("junittest", command="test")
@@ -50,7 +59,8 @@ class TestRules(BazelKotlinTestCase):
 
     def test_mixed_mode_compilation(self):
         self.buildLaunchExpectingSuccess("hellojava")
-    # # TODO what are the kotlin src jar conventions with regards to package positioning ?
+
+        # re-enable this test, and ensure the srcjar includes java sources when mixed mode.
         # def test_srcjar(self):
         #     jar = self.buildJarGetZipFile("testresources", "srcjar")
         #     self.assertJarContains(jar, "testresources/AClass.kttestresources/ConsumerLib.kt")
