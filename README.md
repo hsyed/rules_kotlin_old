@@ -1,4 +1,5 @@
-[Skydoc documentation](https://hsyed.github.io/rules_kotlin/kotlin/kotlin.html)
+
+These rules are now maintained at [bazelbuild/rules_kotlin](http://github.com/bazelbuild/rules_kotlin). This repo will be recycled soon.
 
 # Overview
 
